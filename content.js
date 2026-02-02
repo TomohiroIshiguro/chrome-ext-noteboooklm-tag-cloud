@@ -52,14 +52,18 @@ const updateUI = () => {
 //  1. ダッシュボード (一覧画面)
 // =================================================================
 const renderDashboard = () => {
+  // 位置調整 (リスト表示なら削除)
   ensureTagCloudPosition();
 
   const container = document.getElementById('my-tag-cloud');
-  if (container && container.childElementCount === 0) {
+  // コンテナがなければ(=リスト表示など) 何もしない
+  if (!container) return;
+
+  if (container.childElementCount === 0) {
     refreshTagCloudContent(container);
   }
 
-  const activeBtn = container ? container.querySelector('.cloud-tag.active') : null;
+  const activeBtn = container.querySelector('.cloud-tag.active');
   const selectedTag = (activeBtn && activeBtn.textContent !== 'All') ? activeBtn.textContent : null;
 
   try {
@@ -73,6 +77,16 @@ const renderDashboard = () => {
 // --- タグクラウド位置 ---
 const ensureTagCloudPosition = () => {
   let container = document.getElementById('my-tag-cloud');
+
+  // ★修正: リスト表示(テーブル)が存在するかチェック
+  // mat-table または .project-table があればリスト表示とみなす
+  const isListView = querySelectorDeep('mat-table') || querySelectorDeep('.project-table');
+
+  if (isListView) {
+    // リスト表示の場合はタグクラウドを削除して終了
+    if (container) container.remove();
+    return;
+  }
 
   const projectContainers = querySelectorAllDeep('.my-projects-container');
   if (projectContainers.length === 0) {
@@ -190,7 +204,6 @@ const renameAllTags = (oldName, newName) => {
 
 // --- ID抽出 (カード専用) ---
 const extractNotebookId = (element) => {
-  // 1. リンク
   const link = querySelectorDeep('a[href*="/notebook/"]', element);
   if (link) {
     const href = link.getAttribute('href');
@@ -198,7 +211,6 @@ const extractNotebookId = (element) => {
     if (match) return match[1];
   }
 
-  // 2. ID属性
   const elementsWithId = querySelectorAllDeep('[id*="project-"], [aria-labelledby*="project-"]', element);
   if (element.id && element.id.includes('project-')) elementsWithId.push(element);
 
@@ -216,9 +228,8 @@ const extractNotebookId = (element) => {
   return null;
 };
 
-// --- カード処理 (リスト行は対象外) ---
+// --- カード処理 ---
 const processCardsDeep = (storageItems, selectedTag) => {
-  // project-button または mat-card を検索
   let cards = querySelectorAllDeep('project-button');
   if (cards.length === 0) cards = querySelectorAllDeep('mat-card');
 
@@ -251,7 +262,6 @@ const processCardsDeep = (storageItems, selectedTag) => {
 const updateCardFooter = (card, tags) => {
   let targetContainer = querySelectorDeep('mat-card', card) || card;
 
-  // 既存行があれば取得 (重複防止)
   let tagRow = targetContainer.querySelector('.card-tags-row');
 
   if (!tags || tags.length === 0) {
@@ -307,7 +317,6 @@ const renderNotebookDetail = () => {
         sp.className = 'header-tag';
         sp.innerHTML = `${tag} <span class="header-tag-delete" title="削除">×</span>`;
         sp.querySelector('.header-tag-delete').onclick = (e) => {
-          e.stopPropagation();
           if(confirm(`タグ "${tag}" を削除しますか？`)) {
             const newTags = tags.filter(t => t !== tag);
             chrome.storage.sync.set({[notebookId]: newTags}, refresh);
