@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "NotebookLM Tagger & Filter",
+  "version": "2.00",
+  "permissions": ["storage"],
+  "host_permissions": ["https://notebooklm.google.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://notebooklm.google.com/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ]
+}

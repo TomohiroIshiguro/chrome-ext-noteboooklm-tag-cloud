@@ -1,0 +1,150 @@
+/* =========================================
+   NotebookLM 本体へのスタイル上書き
+   ========================================= */
+
+/* カードのスタイル調整 */
+/* "おすすめ(featured-project)" を含まない標準カードのみ対象 */
+project-button:not(:has(.featured-project)) {
+  height: auto !important;
+  min-height: 100%;
+  position: relative;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+project-button:not(:has(.featured-project)) mat-card {
+  height: auto !important;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding-bottom: 0 !important;
+  overflow: visible !important;
+}
+
+/* =========================================
+   拡張機能 UIスタイル
+   ========================================= */
+
+/* --- タグクラウド (ダッシュボード) --- */
+.tag-cloud-container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  flex-basis: 100%;
+  box-sizing: border-box;
+  padding: 12px 24px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+
+.cloud-tag {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 16px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  user-select: none;
+  transition: all 0.2s;
+}
+.cloud-tag:hover {
+  background-color: #eee;
+  transform: translateY(-1px);
+}
+.cloud-tag.active {
+  background-color: #1565c0;
+  color: white;
+  border-color: #1565c0;
+  box-shadow: 0 2px 4px rgba(21, 101, 192, 0.3);
+}
+
+/* --- カード内タグエリア --- */
+.card-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  /* 要求事項: 下辺 padding 10px */
+  padding: 12px 16px 10px 16px;
+  margin-top: auto;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  border-top: 1px solid rgba(0,0,0,0.03);
+}
+
+.card-mini-tag {
+  font-size: 11px;
+  line-height: 1.4;
+  background-color: #e3f2fd;
+  color: #0d47a1;
+  border: 1px solid #bbdefb;
+  padding: 3px 8px;
+  border-radius: 6px;
+  word-break: break-word;
+  max-width: 100%;
+  text-align: left;
+}
+
+/* --- 詳細画面: ヘッダー下タグバー --- */
+.header-tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 24px;
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.header-tag {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  border: 1px solid #bbdefb;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.header-tag-delete {
+  cursor: pointer;
+  font-weight: bold;
+  color: #1565c0;
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-left: 4px;
+}
+.header-tag-delete:hover {
+  color: #d32f2f;
+}
+
+.header-tag-btn {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 12px;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.header-tag-btn:hover { background-color: #f1f1f1; }
+
+/* フィルタリング用非表示クラス */
+project-button.notebook-hidden,
+.notebook-hidden {
+  display: none !important;
+}
