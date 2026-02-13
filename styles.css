@@ -62,6 +62,29 @@ project-button:not(:has(.featured-project)) mat-card {
   box-shadow: 0 2px 4px rgba(21, 101, 192, 0.3);
 }
 
+/* エクスポート/インポートボタン */
+.export-btn,
+.import-btn {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 16px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  user-select: none;
+  transition: all 0.2s;
+  margin-left: 4px;
+}
+.export-btn:hover,
+.import-btn:hover {
+  background-color: #eee;
+  transform: translateY(-1px);
+}
+.export-btn:active,
+.import-btn:active {
+  transform: translateY(0);
+}
+
 /* --- カード内タグエリア --- */
 .card-tags-row {
   display: flex;

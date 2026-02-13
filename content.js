@@ -173,6 +173,9 @@ const refreshTagCloudContent = (container) => {
 
     createBtn('All', true);
     Array.from(allTags).sort().forEach(tag => createBtn(tag, false));
+
+    // エクスポート/インポートボタンを追加
+    addExportImportButtons(container);
   });
 };
 
@@ -200,6 +203,124 @@ const renameAllTags = (oldName, newName) => {
       });
     }
   });
+};
+
+// --- エクスポート/インポート機能 ---
+const addExportImportButtons = (container) => {
+  // 既にボタンが存在する場合はスキップ
+  if (container.querySelector('.export-btn') || container.querySelector('.import-btn')) {
+    return;
+  }
+
+  // セパレーター
+  const separator = document.createElement('span');
+  separator.style.cssText = 'width: 1px; height: 20px; background-color: #ccc; margin: 0 4px;';
+  container.appendChild(separator);
+
+  // エクスポートボタン
+  const exportBtn = document.createElement('button');
+  exportBtn.className = 'export-btn';
+  exportBtn.textContent = '📥 Export';
+  exportBtn.title = 'タグデータをJSON形式でエクスポート';
+  exportBtn.onclick = () => {
+    chrome.storage.sync.get(null, (items) => {
+      if (chrome.runtime.lastError) {
+        alert('エクスポートに失敗しました: ' + chrome.runtime.lastError.message);
+        return;
+      }
+
+      // タグデータのみを抽出（他の拡張機能のデータを除外）
+      const tagData = {};
+      for (const [key, value] of Object.entries(items)) {
+        if (Array.isArray(value)) {
+          tagData[key] = value;
+        }
+      }
+
+      const jsonStr = JSON.stringify(tagData, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `notebooklm-tags-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  };
+  container.appendChild(exportBtn);
+
+  // インポートボタン
+  const importBtn = document.createElement('button');
+  importBtn.className = 'import-btn';
+  importBtn.textContent = '📤 Import';
+  importBtn.title = 'JSONファイルからタグデータをインポート';
+  importBtn.onclick = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const jsonData = JSON.parse(event.target.result);
+          
+          // データ形式の検証
+          if (typeof jsonData !== 'object' || jsonData === null) {
+            throw new Error('無効なJSON形式です');
+          }
+
+          // 各エントリが配列であることを確認
+          const validData = {};
+          for (const [key, value] of Object.entries(jsonData)) {
+            if (Array.isArray(value)) {
+              validData[key] = value;
+            }
+          }
+
+          if (Object.keys(validData).length === 0) {
+            alert('有効なタグデータが見つかりませんでした');
+            return;
+          }
+
+          // 確認ダイアログ
+          const notebookCount = Object.keys(validData).length;
+          const totalTags = new Set();
+          Object.values(validData).forEach(tags => tags.forEach(t => totalTags.add(t)));
+          
+          if (!confirm(`インポートしますか？\nノートブック数: ${notebookCount}\nタグ数: ${totalTags.size}\n\n既存のデータは上書きされます。`)) {
+            return;
+          }
+
+          // ストレージに保存
+          chrome.storage.sync.set(validData, () => {
+            if (chrome.runtime.lastError) {
+              alert('インポートに失敗しました: ' + chrome.runtime.lastError.message);
+              return;
+            }
+
+            alert(`インポートが完了しました！\nノートブック数: ${notebookCount}\nタグ数: ${totalTags.size}`);
+            
+            // UIを更新
+            const container = document.getElementById('my-tag-cloud');
+            if (container) {
+              refreshTagCloudContent(container);
+            }
+            chrome.storage.sync.get(null, (curr) => processCardsDeep(curr, null));
+          });
+        } catch (error) {
+          alert('JSONファイルの読み込みに失敗しました: ' + error.message);
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+  container.appendChild(importBtn);
 };
 
 // --- ID抽出 (カード専用) ---
